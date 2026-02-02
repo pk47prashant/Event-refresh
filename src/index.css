@@ -2,87 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Event Dashboard Design System - Compact & Professional */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Core backgrounds */
+    --background: 214 32% 97%;
+    --foreground: 215 25% 15%;
+    
+    /* Cards */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 25% 15%;
+    
+    /* Popovers & Modals */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --popover-foreground: 215 25% 15%;
+    
+    /* Primary - Professional Blue */
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary */
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 215 25% 27%;
+    
+    /* Muted */
+    --muted: 214 32% 94%;
+    --muted-foreground: 215 16% 47%;
+    
+    /* Accent */
+    --accent: 217 91% 95%;
+    --accent-foreground: 217 91% 40%;
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders & Inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 50%;
+    
     --radius: 0.5rem;
-
+    
+    /* Event Status Colors */
+    --status-live: 142 71% 45%;
+    --status-live-foreground: 0 0% 100%;
+    --status-completed: 217 91% 50%;
+    --status-completed-foreground: 0 0% 100%;
+    --status-draft: 215 16% 70%;
+    --status-draft-foreground: 215 25% 27%;
+    --status-urgent: 25 95% 53%;
+    --status-urgent-foreground: 0 0% 100%;
+    --status-countdown: 217 91% 50%;
+    --status-countdown-foreground: 0 0% 100%;
+    
+    /* Event Type Colors */
+    --type-simple: 217 91% 95%;
+    --type-simple-foreground: 217 91% 45%;
+    --type-simple-border: 217 91% 80%;
+    --type-standard: 270 60% 95%;
+    --type-standard-foreground: 270 60% 45%;
+    --type-standard-border: 270 60% 80%;
+    --type-advance: 38 92% 95%;
+    --type-advance-foreground: 38 92% 40%;
+    --type-advance-border: 38 92% 75%;
+    
+    /* Stat Card Colors */
+    --stat-attendees: 217 91% 50%;
+    --stat-crew: 270 60% 50%;
+    --stat-organizers: 38 92% 50%;
+    --stat-delegates: 142 71% 45%;
+    --stat-sessions: 239 84% 67%;
+    --stat-speakers: 350 89% 60%;
+    
+    /* Panel & Form */
+    --panel-header: 217 91% 50%;
+    --panel-header-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%), hsl(217 91% 60%));
+    --gradient-success: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 55%));
+    --gradient-panel: linear-gradient(135deg, hsl(217 91% 50%), hsl(230 80% 55%));
+    
+    /* Shadows */
+    --shadow-card: 0 1px 3px 0 hsl(215 25% 15% / 0.08), 0 1px 2px -1px hsl(215 25% 15% / 0.08);
+    --shadow-card-hover: 0 4px 12px -2px hsl(215 25% 15% / 0.12), 0 2px 4px -2px hsl(215 25% 15% / 0.08);
+    --shadow-panel: 0 25px 50px -12px hsl(215 25% 15% / 0.25);
+    
+    /* Sidebar */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 8%;
     --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
+    
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
+    
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
+    
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 8%;
+    
+    --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
+    
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 217 33% 17%;
     --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
+    
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 212 27% 84%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -100,6 +147,23 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
