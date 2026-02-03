@@ -7,7 +7,9 @@ interface EventFormModalProps {
   event: Event | null;
   mode: 'add' | 'edit';
   isOpen: boolean;
+  selectedType?: 'Simple' | 'Standard' | 'Advance';
   onSave: (data: EventFormData) => void;
+  onNext?: (data: EventFormData) => void;
   onClose: () => void;
 }
 
@@ -21,7 +23,7 @@ const timezones = [
 
 const categories = ['Other', 'Conference', 'Workshop', 'Seminar', 'Networking'];
 
-export function EventFormModal({ event, mode, isOpen, onSave, onClose }: EventFormModalProps) {
+export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNext, onClose }: EventFormModalProps) {
   const [formData, setFormData] = useState<EventFormData>({
     name: '',
     category: 'Other',
@@ -54,10 +56,10 @@ export function EventFormModal({ event, mode, isOpen, onSave, onClose }: EventFo
         startDate: '',
         endDate: '',
         timezone: 'Australia/Melbourne',
-        type: 'Standard'
+        type: selectedType || 'Standard'
       });
     }
-  }, [event, isOpen]);
+  }, [event, isOpen, selectedType]);
 
   const handleChange = (field: keyof EventFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -65,7 +67,11 @@ export function EventFormModal({ event, mode, isOpen, onSave, onClose }: EventFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    if (onNext) {
+      onNext(formData);
+    } else {
+      onSave(formData);
+    }
   };
 
   if (!isOpen) return null;
@@ -190,7 +196,7 @@ export function EventFormModal({ event, mode, isOpen, onSave, onClose }: EventFo
                 className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
-                {mode === 'edit' ? 'Update Event' : 'Create Event'}
+                {onNext ? 'Save & Next' : (mode === 'edit' ? 'Save & Next' : 'Create Event')}
               </button>
             </div>
           </form>
