@@ -4,15 +4,23 @@ import { Event, EventFormData } from '@/types/event';
 import { sampleEvents } from '@/data/events';
 import { EventCard } from '@/components/events/EventCard';
 import { EventDetailPanel } from '@/components/events/EventDetailPanel';
+import { EventTypeSelector } from '@/components/events/EventTypeSelector';
 import { EventFormModal } from '@/components/events/EventFormModal';
+import { SessionsModal } from '@/components/events/SessionsModal';
+
+type WizardStep = 'type' | 'details' | 'sessions' | null;
 
 const Index = () => {
   const [events] = useState<Event[]>(sampleEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formEvent, setFormEvent] = useState<Event | null>(null);
+  
+  // Wizard state
+  const [wizardStep, setWizardStep] = useState<WizardStep>(null);
+  const [selectedType, setSelectedType] = useState<'Simple' | 'Standard' | 'Advance'>('Standard');
+  const [formData, setFormData] = useState<EventFormData | null>(null);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
+  const [formEvent, setFormEvent] = useState<Event | null>(null);
 
   const handleViewDetails = (event: Event) => {
     setSelectedEvent(event);
@@ -24,29 +32,58 @@ const Index = () => {
     setTimeout(() => setSelectedEvent(null), 300);
   };
 
-  const handleEditEvent = (event: Event) => {
-    setFormEvent(event);
-    setFormMode('edit');
-    setIsFormOpen(true);
-  };
-
+  // Add Event Flow: Type → Details → Sessions
   const handleAddEvent = () => {
     setFormEvent(null);
     setFormMode('add');
-    setIsFormOpen(true);
+    setWizardStep('type');
   };
 
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
+  const handleTypeSelect = (type: 'Simple' | 'Standard' | 'Advance') => {
+    setSelectedType(type);
+    setWizardStep('details');
+  };
+
+  const handleDetailsNext = (data: EventFormData) => {
+    setFormData(data);
+    setWizardStep('sessions');
+  };
+
+  const handleDetailsSave = (data: EventFormData) => {
+    console.log('Saving event:', data);
+    handleCloseWizard();
+  };
+
+  // Edit Event Flow: Details → Sessions
+  const handleEditEvent = (event: Event) => {
+    setFormEvent(event);
+    setSelectedType(event.type);
+    setFormMode('edit');
+    setWizardStep('details');
+  };
+
+  const handleEditNext = (data: EventFormData) => {
+    setFormData(data);
+    setWizardStep('sessions');
+  };
+
+  const handleSessionsBack = () => {
+    setWizardStep('details');
+  };
+
+  const handleSessionsComplete = () => {
+    console.log('Event setup complete:', formData);
+    handleCloseWizard();
+  };
+
+  const handleCloseWizard = () => {
+    setWizardStep(null);
     setTimeout(() => {
       setFormEvent(null);
+      setFormData(null);
       setFormMode('add');
+      setSelectedType('Standard');
     }, 300);
-  };
-
-  const handleSaveEvent = (eventData: EventFormData) => {
-    console.log('Saving event:', eventData);
-    handleCloseForm();
   };
 
   return (
@@ -87,13 +124,31 @@ const Index = () => {
         onClose={handleClosePanel}
       />
 
-      {/* Form Modal */}
+      {/* Step 1: Type Selector (Add flow only) */}
+      <EventTypeSelector
+        isOpen={wizardStep === 'type'}
+        onSelect={handleTypeSelect}
+        onClose={handleCloseWizard}
+      />
+
+      {/* Step 2: Event Details Form */}
       <EventFormModal
         event={formEvent}
         mode={formMode}
-        isOpen={isFormOpen}
-        onSave={handleSaveEvent}
-        onClose={handleCloseForm}
+        isOpen={wizardStep === 'details'}
+        selectedType={selectedType}
+        onSave={formMode === 'add' ? handleDetailsSave : handleDetailsSave}
+        onNext={formMode === 'add' ? handleDetailsNext : handleEditNext}
+        onClose={handleCloseWizard}
+      />
+
+      {/* Step 3: Sessions */}
+      <SessionsModal
+        isOpen={wizardStep === 'sessions'}
+        eventData={formData}
+        onBack={handleSessionsBack}
+        onComplete={handleSessionsComplete}
+        onClose={handleCloseWizard}
       />
     </div>
   );
