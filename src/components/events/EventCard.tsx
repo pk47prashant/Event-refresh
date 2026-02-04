@@ -67,7 +67,7 @@ export function EventCard({ event, onViewDetails, onEdit, onArchive, onUnarchive
     { icon: Crown, value: event.organizers, color: "text-stat-organizers", bg: "bg-amber-500/10" },
   ];
 
-  const showArchiveButton = onArchive && !event.archived;
+  const showArchiveButton = onArchive && !event.archived && event.status !== "Live";
   const showUnarchiveButton = onUnarchive && event.archived;
 
   return (
