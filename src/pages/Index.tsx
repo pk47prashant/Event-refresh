@@ -24,14 +24,8 @@ type TypeFilter = 'All' | 'Simple' | 'Standard' | 'Advance';
 
 const Index = () => {
   const [events, setEvents] = useState<Event[]>(() => {
-    const saved = localStorage.getItem('events');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved events', e);
-      }
-    }
+    // Clear old events to ensure new sample data is loaded
+    localStorage.removeItem('events');
     return sampleEvents.map(e => ({ ...e, archived: false }));
   });
 
@@ -142,8 +136,8 @@ const Index = () => {
       filtered = filtered.filter(event => event.type === typeFilter);
     }
 
-    // Filter by date range (not for live tab)
-    if (activeTab !== 'live' && dateRange.from) {
+    // Filter by date range (not for schedule tab when events are live)
+    if (activeTab !== 'schedule' && dateRange.from) {
       filtered = filtered.filter(event => {
         const eventStart = new Date(event.startDate);
         if (dateRange.to) {
