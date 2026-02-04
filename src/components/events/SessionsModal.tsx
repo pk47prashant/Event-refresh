@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Calendar, List, Plus, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { EventFormData } from '@/types/event';
+import { SessionFormModal, SessionData } from './SessionFormModal';
 
 interface SessionsModalProps {
   isOpen: boolean;
@@ -18,6 +19,16 @@ const timeSlots = ['12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 P
 export function SessionsModal({ isOpen, eventData, onBack, onComplete, onClose }: SessionsModalProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
+  const [sessions, setSessions] = useState<SessionData[]>([]);
+  const [isAddSessionOpen, setIsAddSessionOpen] = useState(false);
+
+  const handleAddSession = (session: SessionData) => {
+    setSessions([...sessions, session]);
+  };
+
+  const handleDeleteSession = (sessionId: string) => {
+    setSessions(sessions.filter(s => s.id !== sessionId));
+  };
 
   if (!isOpen) return null;
 
@@ -113,7 +124,10 @@ export function SessionsModal({ isOpen, eventData, onBack, onComplete, onClose }
                 <Clock className="w-4 h-4" />
                 <span>{getEventDateRange()}</span>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary/80 text-primary-foreground rounded-lg hover:bg-primary transition-colors">
+              <button 
+                onClick={() => setIsAddSessionOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary/80 text-primary-foreground rounded-lg hover:bg-primary transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 Add Session
               </button>
@@ -244,6 +258,16 @@ export function SessionsModal({ isOpen, eventData, onBack, onComplete, onClose }
           </div>
         </div>
       </div>
+
+      {/* Add Session Modal */}
+      <SessionFormModal
+        isOpen={isAddSessionOpen}
+        eventData={eventData}
+        sessions={sessions}
+        onAddSession={handleAddSession}
+        onDeleteSession={handleDeleteSession}
+        onClose={() => setIsAddSessionOpen(false)}
+      />
     </>
   );
 }

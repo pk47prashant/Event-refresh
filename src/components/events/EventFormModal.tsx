@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Save, Calendar, MapPin, Globe, Clock, List, Building, Search } from 'lucide-react';
+import { X, Save, Calendar, MapPin, Globe, Clock, List, Building, Search, ChevronDown } from 'lucide-react';
 import { EventFormData } from '@/types/event';
 import { countries, categories } from '@/data/countries';
+import { format, parse, isPast } from 'date-fns';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface EventFormModalProps {
   event: { name: string; type: 'Simple' | 'Standard' | 'Advance' } | null;
@@ -47,6 +50,10 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
   const [errors, setErrors] = useState<FormErrors>({});
   const [countrySearch, setCountrySearch] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [startDateObj, setStartDateObj] = useState<Date | undefined>(undefined);
+  const [endDateObj, setEndDateObj] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
 
   // Get available timezones based on selected country
   const availableTimezones = useMemo(() => {
@@ -93,6 +100,10 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
       });
     }
     setErrors({});
+    setStartDateObj(undefined);
+    setEndDateObj(undefined);
+    setStartTime('');
+    setEndTime('');
   }, [event, isOpen, selectedType]);
 
   // Update timezone when country changes
@@ -120,6 +131,71 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
     setIsCountryDropdownOpen(false);
   };
 
+  const handleStartDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    setStartDateObj(date);
+    if (startTime) {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const datetimeStr = `${dateStr}T${startTime}`;
+      handleChange('startDate', datetimeStr);
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    setEndDateObj(date);
+    if (endTime) {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const datetimeStr = `${dateStr}T${endTime}`;
+      handleChange('endDate', datetimeStr);
+    }
+  };
+
+  const handleDateRangeSelect = (range: { from?: Date; to?: Date } | undefined) => {
+    if (range?.from) {
+      setStartDateObj(range.from);
+      if (range.to) {
+        setEndDateObj(range.to);
+        if (startTime) {
+          const startDateStr = format(range.from, 'yyyy-MM-dd');
+          const startDatetime = `${startDateStr}T${startTime}`;
+          handleChange('startDate', startDatetime);
+        }
+        if (endTime) {
+          const endDateStr = format(range.to, 'yyyy-MM-dd');
+          const endDatetime = `${endDateStr}T${endTime}`;
+          handleChange('endDate', endDatetime);
+        }
+      } else {
+        setEndDateObj(range.from);
+        if (startTime) {
+          const dateStr = format(range.from, 'yyyy-MM-dd');
+          const datetimeStr = `${dateStr}T${startTime}`;
+          handleChange('startDate', datetimeStr);
+          handleChange('endDate', datetimeStr);
+        }
+      }
+    }
+  };
+
+  const handleStartTimeChange = (time: string) => {
+    setStartTime(time);
+    if (startDateObj) {
+      const dateStr = format(startDateObj, 'yyyy-MM-dd');
+      const datetimeStr = `${dateStr}T${time}`;
+      handleChange('startDate', datetimeStr);
+    }
+  };
+
+  const handleEndTimeChange = (time: string) => {
+    setEndTime(time);
+    if (endDateObj) {
+      const dateStr = format(endDateObj, 'yyyy-MM-dd');
+      const datetimeStr = `${dateStr}T${time}`;
+      handleChange('endDate', datetimeStr);
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -138,14 +214,20 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
     if (!formData.timezone) {
       newErrors.timezone = 'Time zone is required';
     }
-    if (!formData.startDate) {
-      newErrors.startDate = 'Start date/time is required';
-    }
-    if (!formData.endDate) {
-      newErrors.endDate = 'End date/time is required';
-    }
-    if (formData.startDate && formData.endDate && new Date(formData.startDate) >= new Date(formData.endDate)) {
+    if (!formData.startDate || !formData.endDate) {
+      newErrors.startDate = 'Start and end date with time are required';
+    } else if (!startTime || !endTime) {
+      newErrors.startDate = 'Start and end time are required';
+    } else if (new Date(formData.startDate) >= new Date(formData.endDate)) {
       newErrors.endDate = 'End date must be after start date';
+    }
+
+    // Check if start date/time is in the past
+    if (formData.startDate) {
+      const startDateTime = new Date(formData.startDate);
+      if (isPast(startDateTime)) {
+        newErrors.startDate = 'Start date and time cannot be in the past';
+      }
     }
 
     setErrors(newErrors);
@@ -220,24 +302,28 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
                   error={errors.category}
                 />
 
-                <FormField
-                  icon={Globe}
-                  label="Website URL"
-                  value={formData.websiteUrl}
-                  onChange={() => {}}
-                  placeholder="Auto-generated"
-                  disabled
-                />
+                {formData.type !== 'Simple' && (
+                  <>
+                    <FormField
+                      icon={Globe}
+                      label="Website URL"
+                      value={formData.websiteUrl}
+                      onChange={() => {}}
+                      placeholder="Auto-generated"
+                      disabled
+                    />
 
-                <FormSelect
-                  icon={Building}
-                  label="Mode"
-                  required
-                  value={formData.mode}
-                  onChange={(v) => handleChange('mode', v)}
-                  options={['in-person', 'hybrid']}
-                  optionLabels={['In-Person', 'Hybrid']}
-                />
+                    <FormSelect
+                      icon={Building}
+                      label="Mode"
+                      required
+                      value={formData.mode}
+                      onChange={(v) => handleChange('mode', v)}
+                      options={['in-person', 'hybrid']}
+                      optionLabels={['In-Person', 'Hybrid']}
+                    />
+                  </>
+                )}
 
                 {/* Country with Search */}
                 <div className="relative">
@@ -309,26 +395,103 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
                   error={errors.timezone}
                 />
 
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    icon={Calendar}
-                    label="Start Date/Time"
-                    required
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={(v) => handleChange('startDate', v)}
-                    error={errors.startDate}
-                  />
+                {/* Event Date & Time */}
+                <div className="md:col-span-2">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Event Date & Time
+                    <span className="text-destructive">*</span>
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={`w-full px-3 py-2 text-sm border rounded-lg bg-card text-left transition-colors ${
+                          errors.startDate || errors.endDate ? 'border-destructive' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {startDateObj && endDateObj && startTime && endTime ? (
+                          `${format(startDateObj, 'MMM dd, yyyy')} ${startTime} → ${format(endDateObj, 'MMM dd, yyyy')} ${endTime}`
+                        ) : startDateObj && endDateObj ? (
+                          <>
+                            {format(startDateObj, 'MMM dd, yyyy')} <span className="text-destructive">(select time)</span> → {format(endDateObj, 'MMM dd, yyyy')} <span className="text-destructive">(select time)</span>
+                          </>
+                        ) : startDateObj && startTime ? (
+                          `${format(startDateObj, 'MMM dd, yyyy')} ${startTime}`
+                        ) : startDateObj ? (
+                          <>
+                            {format(startDateObj, 'MMM dd, yyyy')} <span className="text-destructive">(select time)</span>
+                          </>
+                        ) : (
+                          'Pick date & time range'
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom" avoidCollisions={false}>
+                      <div className="p-4">
+                        <CalendarComponent
+                          initialFocus
+                          mode="range"
+                          defaultMonth={startDateObj}
+                          selected={{ from: startDateObj, to: endDateObj }}
+                          onSelect={(range) => handleDateRangeSelect(range)}
+                          numberOfMonths={2}
+                        />
+                      </div>
 
-                  <FormField
-                    icon={Calendar}
-                    label="End Date/Time"
-                    required
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={(v) => handleChange('endDate', v)}
-                    error={errors.endDate}
-                  />
+                      {/* Time Inputs Inside Popover */}
+                      <div className="border-t border-border p-3 bg-muted/30">
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1 block">Start Time</label>
+                            <input
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => handleStartTimeChange(e.target.value)}
+                              disabled={!startDateObj}
+                              className={`w-full px-3 py-2 text-sm border rounded-lg bg-card text-card-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                errors.startDate ? 'border-destructive' : 'border-border'
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1 block">End Time</label>
+                            <input
+                              type="time"
+                              value={endTime}
+                              onChange={(e) => handleEndTimeChange(e.target.value)}
+                              disabled={!endDateObj}
+                              className={`w-full px-3 py-2 text-sm border rounded-lg bg-card text-card-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                errors.endDate ? 'border-destructive' : 'border-border'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setStartDateObj(undefined);
+                              setEndDateObj(undefined);
+                              setStartTime('');
+                              setEndTime('');
+                              handleChange('startDate', '');
+                              handleChange('endDate', '');
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-card-foreground rounded-lg hover:bg-muted transition-colors"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  {(errors.startDate || errors.endDate) && (
+                    <div className="space-y-1 mt-1">
+                      {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

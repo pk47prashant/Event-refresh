@@ -6,7 +6,7 @@ import { EventCard } from '@/components/events/EventCard';
 import { EventDetailPanel } from '@/components/events/EventDetailPanel';
 import { EventTypeSelector } from '@/components/events/EventTypeSelector';
 import { EventFormModal } from '@/components/events/EventFormModal';
-import { SessionsModal } from '@/components/events/SessionsModal';
+import { SessionFormModal, SessionData } from '@/components/events/SessionFormModal';
 import { EventUsersModal } from '@/components/events/EventUsersModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -222,6 +222,13 @@ const Index = () => {
     }
   };
 
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSortBy('startDate');
+    setTypeFilter('All');
+    setDateRange({ from: undefined, to: undefined });
+  };
+
   // Edit Event Flow: Details → Sessions (if required) → Users
   const handleEditEvent = (event: Event) => {
     setFormEvent({ name: event.name, type: event.type });
@@ -341,7 +348,7 @@ const Index = () => {
         <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full md:w-auto">
             <TabsList className="w-full md:w-auto justify-start">
-              <TabsTrigger value="schedule">Schedule</TabsTrigger>
+              <TabsTrigger value="schedule">Scheduled</TabsTrigger>
               <TabsTrigger value="draft">Draft</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>
               <TabsTrigger value="archived">Archived</TabsTrigger>
@@ -448,6 +455,13 @@ const Index = () => {
                   <SelectItem value="name">Event Name</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            
+            {/* Reset Filters Button */}
+            <div className="flex items-center">
+              <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-primary border-primary hover:bg-primary/5">
+                Reset
+              </Button>
             </div>
           </div>
         </div>
@@ -573,12 +587,14 @@ const Index = () => {
       />
 
       {/* Step 3: Sessions (only if sessionRequired) */}
-      <SessionsModal
+      <SessionFormModal
         isOpen={wizardStep === 'sessions'}
         eventData={formData}
-        onBack={handleSessionsBack}
-        onComplete={handleSessionsNext}
+        onSave={(sessions: SessionData[]) => {
+          setWizardStep('users');
+        }}
         onClose={handleCloseWizard}
+        onBack={() => setWizardStep('details')}
       />
 
       {/* Step 4: Event Users */}
