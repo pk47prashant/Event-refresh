@@ -287,12 +287,40 @@ const Index = () => {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = (isDraft: boolean) => {
     if (formData) {
+      let status: string = 'Draft';
+      
+      if (!isDraft) {
+        const now = new Date();
+        const startDate = new Date(formData.startDate);
+        const endDate = new Date(formData.endDate);
+        
+        if (now >= startDate && now <= endDate) {
+          status = 'Live';
+        } else if (now > endDate) {
+          status = 'Completed';
+        } else {
+          // Calculate time left for upcoming
+          const timeDiff = startDate.getTime() - now.getTime();
+          const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+          const hoursLeft = Math.floor(timeDiff / (1000 * 60 * 60));
+          const minutesLeft = Math.floor(timeDiff / (1000 * 60));
+          
+          if (minutesLeft < 60) {
+            status = `${minutesLeft} min left`;
+          } else if (hoursLeft < 24) {
+            status = `${hoursLeft} hours left`;
+          } else {
+            status = `${daysLeft} days left`;
+          }
+        }
+      }
+
       const newEvent: Event = {
         id: `evt-${Date.now()}`,
         ...formData,
-        status: 'Draft',
+        status: status as any,
         archived: false,
         attendees: 0,
         crew: 0,

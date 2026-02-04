@@ -7,7 +7,7 @@ interface EventUsersModalProps {
   isOpen: boolean;
   eventData: EventFormData | null;
   onBack: () => void;
-  onComplete: () => void;
+  onComplete: (isDraft: boolean) => void;
   onClose: () => void;
 }
 
@@ -223,13 +223,22 @@ export function EventUsersModal({ isOpen, eventData, onBack, onComplete, onClose
             >
               Back
             </button>
-            <button
-              type="button"
-              onClick={onComplete}
-              className="px-6 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Complete Setup
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => onComplete(true)}
+                className="px-6 py-2 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => onComplete(false)}
+                className="px-6 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Save & Publish
+              </button>
+            </div>
           </div>
         </div>
       </div>
