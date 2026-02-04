@@ -1,174 +1,223 @@
 import { Event } from '@/types/event';
 
+const now = new Date();
+const tomorrow = new Date(now);
+tomorrow.setDate(now.getDate() + 1);
+
+const nextWeek = new Date(now);
+nextWeek.setDate(now.getDate() + 7);
+
+const lastWeek = new Date(now);
+lastWeek.setDate(now.getDate() - 7);
+
+const lastMonth = new Date(now);
+lastMonth.setMonth(now.getMonth() - 1);
+
 export const sampleEvents: Event[] = [
+  // Live Events
   {
-    id: 'evt-1',
-    name: "Annual Tech Innovation Summit 2024: Exploring AI, Cloud Computing, and Digital Transformation",
-    startDate: "2024-03-15T09:00:00",
-    endDate: "2024-03-15T17:30:00",
-    timezone: "Australia/Melbourne",
-    location: "Melbourne Convention Centre, South Wharf VIC 3006",
-    country: "Australia",
-    address: "Melbourne Convention Centre, South Wharf VIC 3006",
-    mode: "hybrid",
-    type: "Standard",
-    category: "Conference",
-    websiteUrl: "events.example.com/tech-summit-2024/home",
-    sessionRequired: true,
-    commsRequired: true,
-    surveyRequired: true,
-    status: "5 days left",
-    attendees: 450,
-    crew: 25,
-    organizers: 3,
-    delegates: 120,
-    sessions: 18,
+    id: '1',
+    name: 'Global Tech Summit 2026',
+    category: 'Conference',
+    websiteUrl: 'techsummit.com',
+    mode: 'hybrid',
+    country: 'United States',
+    address: 'San Francisco Convention Center',
+    timezone: 'PST',
+    startDate: new Date(now.getTime() - 3600000).toISOString(), // Started 1 hour ago
+    endDate: new Date(now.getTime() + 7200000).toISOString(), // Ends in 2 hours
+    type: 'Advance',
+    status: 'Live',
+    attendees: 1250,
+    crew: 45,
+    organizers: 12,
+    delegates: 85,
+    sessions: 24,
     speakers: 32,
     analytics: {
-      registered: 450,
-      checkedIn: 387,
-      mailAnalytics: {
-        sent: 450,
-        opened: 398,
-        clicked: 245,
-        bounced: 8
-      }
+      registered: 1500,
+      checkedIn: 1100,
+      mailAnalytics: { sent: 4500, opened: 3200, clicked: 1800, bounced: 45 }
     }
   },
+  // Scheduled Events
   {
-    id: 'evt-2',
-    name: "Web Development Workshop: Modern React Patterns",
-    startDate: "2024-03-10T14:00:00",
-    endDate: "2024-03-10T16:00:00",
-    timezone: "Australia/Sydney",
-    location: "Tech Hub Sydney, 123 Pitt Street NSW 2000",
-    country: "Australia",
-    address: "123 Pitt Street NSW 2000",
-    mode: "in-person",
-    type: "Simple",
-    category: "Workshop",
-    websiteUrl: "events.example.com/web-workshop/home",
-    sessionRequired: false,
-    commsRequired: true,
-    surveyRequired: true,
-    status: "5 min left",
-    attendees: 85,
-    crew: 5,
-    organizers: 1,
-    delegates: 0,
-    sessions: 3,
-    speakers: 4,
-    analytics: {
-      registered: 85,
-      checkedIn: 78,
-      mailAnalytics: {
-        sent: 85,
-        opened: 72,
-        clicked: 45,
-        bounced: 2
-      }
-    }
-  },
-  {
-    id: 'evt-3',
-    name: "International Marketing Conference: Strategies for Global Growth",
-    startDate: "2024-03-12T10:00:00",
-    endDate: "2024-03-14T18:00:00",
-    timezone: "Australia/Melbourne",
-    location: "Crown Conference Centre, Southbank VIC 3006",
-    country: "Australia",
-    address: "Crown Conference Centre, Southbank VIC 3006",
-    mode: "hybrid",
-    type: "Advance",
-    category: "Conference",
-    websiteUrl: "events.example.com/marketing-conference/home",
-    sessionRequired: true,
-    commsRequired: true,
-    surveyRequired: true,
-    status: "Live",
-    attendees: 680,
-    crew: 42,
-    organizers: 5,
-    delegates: 215,
-    sessions: 35,
-    speakers: 58,
-    analytics: {
-      registered: 680,
-      checkedIn: 612,
-      mailAnalytics: {
-        sent: 680,
-        opened: 615,
-        clicked: 423,
-        bounced: 12
-      }
-    }
-  },
-  {
-    id: 'evt-4',
-    name: "Startup Pitch Night: Connect with Investors",
-    startDate: "2024-02-28T18:00:00",
-    endDate: "2024-02-28T21:00:00",
-    timezone: "Australia/Brisbane",
-    location: "Brisbane Startup Hub, Fortitude Valley QLD 4006",
-    country: "Australia",
-    address: "Brisbane Startup Hub, Fortitude Valley QLD 4006",
-    mode: "in-person",
-    type: "Standard",
-    category: "Networking",
-    websiteUrl: "events.example.com/startup-pitch/home",
-    sessionRequired: true,
-    commsRequired: true,
-    surveyRequired: false,
-    status: "Completed",
-    attendees: 156,
-    crew: 12,
+    id: '2',
+    name: 'Product Design Workshop',
+    category: 'Workshop',
+    websiteUrl: 'designworkshop.io',
+    mode: 'in-person',
+    country: 'United Kingdom',
+    address: 'London Design Studio',
+    timezone: 'GMT',
+    startDate: tomorrow.toISOString(),
+    endDate: new Date(tomorrow.getTime() + 14400000).toISOString(),
+    type: 'Standard',
+    status: '24 hours left',
+    attendees: 45,
+    crew: 4,
     organizers: 2,
-    delegates: 45,
-    sessions: 8,
-    speakers: 12,
+    delegates: 0,
+    sessions: 4,
+    speakers: 2,
     analytics: {
-      registered: 156,
-      checkedIn: 156,
-      mailAnalytics: {
-        sent: 156,
-        opened: 142,
-        clicked: 89,
-        bounced: 3
-      }
+      registered: 50,
+      checkedIn: 0,
+      mailAnalytics: { sent: 200, opened: 150, clicked: 85, bounced: 2 }
     }
   },
   {
-    id: 'evt-5',
-    name: "Design Thinking Masterclass: User-Centered Innovation",
-    startDate: "2024-04-20T09:30:00",
-    endDate: "2024-04-20T17:00:00",
-    timezone: "Australia/Perth",
-    location: "Perth Creative Space, 45 St Georges Terrace WA 6000",
-    country: "Australia",
-    address: "45 St Georges Terrace WA 6000",
-    mode: "in-person",
-    type: "Advance",
-    category: "Workshop",
-    websiteUrl: "events.example.com/design-masterclass/home",
-    sessionRequired: true,
-    commsRequired: false,
-    surveyRequired: true,
-    status: "Draft",
+    id: '3',
+    name: 'Marketing Strategy Seminar',
+    category: 'Seminar',
+    websiteUrl: 'marketing2026.com',
+    mode: 'in-person',
+    country: 'Australia',
+    address: 'Sydney Business Hub',
+    timezone: 'AEST',
+    startDate: nextWeek.toISOString(),
+    endDate: new Date(nextWeek.getTime() + 7200000).toISOString(),
+    type: 'Simple',
+    status: '7 days left',
+    attendees: 120,
+    crew: 6,
+    organizers: 3,
+    delegates: 10,
+    sessions: 1,
+    speakers: 1,
+    analytics: {
+      registered: 135,
+      checkedIn: 0,
+      mailAnalytics: { sent: 400, opened: 280, clicked: 120, bounced: 5 }
+    }
+  },
+  // Draft Events
+  {
+    id: '4',
+    name: 'Annual Partners Meeting',
+    category: 'Networking',
+    websiteUrl: 'partners2026.com',
+    mode: 'in-person',
+    country: 'Singapore',
+    address: 'Marina Bay Sands',
+    timezone: 'SGT',
+    startDate: new Date(now.getTime() + 2592000000).toISOString(), // 30 days later
+    endDate: new Date(now.getTime() + 2599200000).toISOString(),
+    type: 'Standard',
+    status: 'Draft',
     attendees: 0,
-    crew: 8,
-    organizers: 2,
+    crew: 0,
+    organizers: 5,
     delegates: 0,
-    sessions: 6,
-    speakers: 8,
+    sessions: 0,
+    speakers: 0,
     analytics: {
       registered: 0,
       checkedIn: 0,
-      mailAnalytics: {
-        sent: 0,
-        opened: 0,
-        clicked: 0,
-        bounced: 0
-      }
+      mailAnalytics: { sent: 0, opened: 0, clicked: 0, bounced: 0 }
+    }
+  },
+  {
+    id: '5',
+    name: 'AI Ethics Roundtable',
+    category: 'Workshop',
+    websiteUrl: 'aiethics.org',
+    mode: 'hybrid',
+    country: 'Germany',
+    address: 'Berlin Tech Center',
+    timezone: 'CET',
+    startDate: new Date(now.getTime() + 1296000000).toISOString(), // 15 days later
+    endDate: new Date(now.getTime() + 1303200000).toISOString(),
+    type: 'Advance',
+    status: 'Draft',
+    attendees: 0,
+    crew: 0,
+    organizers: 2,
+    delegates: 0,
+    sessions: 0,
+    speakers: 0,
+    analytics: {
+      registered: 0,
+      checkedIn: 0,
+      mailAnalytics: { sent: 0, opened: 0, clicked: 0, bounced: 0 }
+    }
+  },
+  // Past Events
+  {
+    id: '6',
+    name: 'Winter Developer Expo 2025',
+    category: 'Conference',
+    websiteUrl: 'devexpo2025.com',
+    mode: 'in-person',
+    country: 'Canada',
+    address: 'Toronto Expo Center',
+    timezone: 'EST',
+    startDate: lastMonth.toISOString(),
+    endDate: new Date(lastMonth.getTime() + 172800000).toISOString(),
+    type: 'Advance',
+    status: 'Completed',
+    attendees: 2100,
+    crew: 60,
+    organizers: 15,
+    delegates: 120,
+    sessions: 48,
+    speakers: 55,
+    analytics: {
+      registered: 2400,
+      checkedIn: 2100,
+      mailAnalytics: { sent: 12000, opened: 8500, clicked: 4200, bounced: 150 }
+    }
+  },
+  {
+    id: '7',
+    name: 'Startup Pitch Night',
+    category: 'Networking',
+    websiteUrl: 'pitchnight.io',
+    mode: 'in-person',
+    country: 'United States',
+    address: 'Austin Innovation Lab',
+    timezone: 'CST',
+    startDate: lastWeek.toISOString(),
+    endDate: new Date(lastWeek.getTime() + 14400000).toISOString(),
+    type: 'Simple',
+    status: 'Completed',
+    attendees: 85,
+    crew: 4,
+    organizers: 2,
+    delegates: 5,
+    sessions: 1,
+    speakers: 8,
+    analytics: {
+      registered: 110,
+      checkedIn: 85,
+      mailAnalytics: { sent: 500, opened: 350, clicked: 180, bounced: 12 }
+    }
+  },
+  // Archived Events
+  {
+    id: '8',
+    name: 'Old Project Kickoff',
+    category: 'Seminar',
+    websiteUrl: 'oldproject.com',
+    mode: 'in-person',
+    country: 'France',
+    address: 'Paris Office',
+    timezone: 'CET',
+    startDate: new Date(now.getTime() - 31536000000).toISOString(), // 1 year ago
+    endDate: new Date(now.getTime() - 31528800000).toISOString(),
+    type: 'Standard',
+    status: 'Completed',
+    archived: true,
+    attendees: 25,
+    crew: 2,
+    organizers: 1,
+    delegates: 0,
+    sessions: 1,
+    speakers: 2,
+    analytics: {
+      registered: 30,
+      checkedIn: 25,
+      mailAnalytics: { sent: 100, opened: 80, clicked: 45, bounced: 1 }
     }
   }
 ];

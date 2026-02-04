@@ -18,7 +18,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 type WizardStep = 'type' | 'details' | 'sessions' | 'users' | null;
-type TabType = 'live' | 'upcoming' | 'past' | 'archived';
+type TabType = 'schedule' | 'draft' | 'past' | 'archived';
 type SortOption = 'startDate' | 'name';
 type TypeFilter = 'All' | 'Simple' | 'Standard' | 'Advance';
 
@@ -37,7 +37,7 @@ const Index = () => {
 
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('live');
+  const [activeTab, setActiveTab] = useState<TabType>('schedule');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('startDate');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('All');
@@ -124,10 +124,10 @@ const Index = () => {
       const endDate = new Date(event.endDate);
       
       switch (activeTab) {
-        case 'live':
-          return event.status === 'Live';
-        case 'upcoming':
-          return event.status !== 'Live' && event.status !== 'Completed' && now < startDate;
+        case 'schedule':
+          return (event.status === 'Live' || (event.status !== 'Completed' && event.status !== 'Draft' && now < startDate));
+        case 'draft':
+          return event.status === 'Draft';
         case 'past':
           return event.status === 'Completed';
         case 'archived':
@@ -172,48 +172,7 @@ const Index = () => {
     return filtered;
   }, [events, activeTab, searchQuery, sortBy, typeFilter, dateRange]);
 
-  // Get draft events for upcoming tab
-  const draftEvents = useMemo(() => {
-    if (activeTab !== 'upcoming') return [];
-    
-    let drafts = events.filter(event => 
-      !event.archived && event.status === 'Draft'
-    );
-
-    // Filter by type
-    if (typeFilter !== 'All') {
-      drafts = drafts.filter(event => event.type === typeFilter);
-    }
-
-    // Filter by date range
-    if (dateRange.from) {
-      drafts = drafts.filter(event => {
-        const eventStart = new Date(event.startDate);
-        if (dateRange.to) {
-          return eventStart >= dateRange.from! && eventStart <= dateRange.to!;
-        }
-        return eventStart >= dateRange.from!;
-      });
-    }
-    
-    // Filter by search query
-    if (searchQuery.trim()) {
-      drafts = drafts.filter(event => 
-        event.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    // Sort drafts
-    drafts.sort((a, b) => {
-      if (sortBy === 'startDate') {
-        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-      } else {
-        return a.name.localeCompare(b.name);
-      }
-    });
-    
-    return drafts;
-  }, [events, activeTab, searchQuery, sortBy, typeFilter, dateRange]);
+  // Draft events are now handled by the main filteredAndSortedEvents logic for the 'draft' tab
 
   const handleViewDetails = (event: Event) => {
     setSelectedEvent(event);
@@ -369,8 +328,8 @@ const Index = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full md:w-auto">
             <TabsList className="w-full md:w-auto justify-start">
-              <TabsTrigger value="live">Live</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="schedule">Schedule</TabsTrigger>
+              <TabsTrigger value="draft">Draft</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>
               <TabsTrigger value="archived">Archived</TabsTrigger>
             </TabsList>
@@ -482,11 +441,11 @@ const Index = () => {
 
         {/* Tab Content */}
         <Tabs value={activeTab} className="w-full">
-          {/* Live Tab */}
-          <TabsContent value="live">
+          {/* Schedule Tab */}
+          <TabsContent value="schedule">
             {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No live events at the moment</p>
+                <p className="text-muted-foreground">No scheduled or live events at the moment</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -503,29 +462,11 @@ const Index = () => {
             )}
           </TabsContent>
 
-          {/* Upcoming Tab */}
-          <TabsContent value="upcoming">
-            {/* Draft Events Section */}
-            {draftEvents.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-4">Draft Events</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {draftEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onViewDetails={handleViewDetails}
-                      onEdit={handleEditEvent}
-                      onArchive={handleArchive}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {draftEvents.length === 0 && filteredAndSortedEvents.length === 0 && (
+          {/* Draft Tab */}
+          <TabsContent value="draft">
+            {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground mb-4">No upcoming events or drafts</p>
+                <p className="text-muted-foreground mb-4">No draft events</p>
                 <button 
                   onClick={handleAddEvent}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
@@ -534,23 +475,17 @@ const Index = () => {
                   Create New Event
                 </button>
               </div>
-            )}
-
-            {/* Upcoming Events Section */}
-            {filteredAndSortedEvents.length > 0 && (
-              <div>
-                {draftEvents.length > 0 && <h2 className="text-lg font-semibold mb-4">Scheduled Events</h2>}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredAndSortedEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onViewDetails={handleViewDetails}
-                      onEdit={handleEditEvent}
-                      onArchive={handleArchive}
-                    />
-                  ))}
-                </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAndSortedEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEditEvent}
+                    onArchive={handleArchive}
+                  />
+                ))}
               </div>
             )}
           </TabsContent>
