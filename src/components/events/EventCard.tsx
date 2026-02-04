@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit } from 'lucide-react';
+import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit, Archive, ArchiveRestore } from 'lucide-react';
 import { Event } from '@/types/event';
 import { cn } from '@/lib/utils';
 
@@ -6,6 +6,8 @@ interface EventCardProps {
   event: Event;
   onViewDetails: (event: Event) => void;
   onEdit: (event: Event) => void;
+  onArchive?: (eventId: string) => void;
+  onUnarchive?: (eventId: string) => void;
 }
 
 const formatDate = (startDate: string, endDate: string) => {
@@ -58,12 +60,15 @@ const getProgressGradient = (status: string) => {
 
 const isFutureEvent = (status: string) => !['Completed', 'Live'].includes(status);
 
-export function EventCard({ event, onViewDetails, onEdit }: EventCardProps) {
+export function EventCard({ event, onViewDetails, onEdit, onArchive, onUnarchive }: EventCardProps) {
   const stats = [
     { icon: Users, value: event.attendees, color: "text-stat-attendees", bg: "bg-primary/10" },
     { icon: UserCheck, value: event.crew, color: "text-stat-crew", bg: "bg-purple-500/10" },
     { icon: Crown, value: event.organizers, color: "text-stat-organizers", bg: "bg-amber-500/10" },
   ];
+
+  const showArchiveButton = onArchive && !event.archived;
+  const showUnarchiveButton = onUnarchive && event.archived;
 
   return (
     <div className="group bg-card rounded-lg shadow-card hover:shadow-card-hover transition-all duration-200 overflow-hidden border border-border">
@@ -123,25 +128,48 @@ export function EventCard({ event, onViewDetails, onEdit }: EventCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-3 border-t border-border">
-          {isFutureEvent(event.status) && (
+        <div className="flex flex-col gap-2 pt-3 border-t border-border">
+          <div className="flex gap-2">
+            {isFutureEvent(event.status) && !event.archived && (
+              <button 
+                onClick={() => onEdit(event)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/5 transition-colors"
+              >
+                <Edit className="w-3 h-3" />
+                Edit
+              </button>
+            )}
             <button 
-              onClick={() => onEdit(event)}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/5 transition-colors"
+              onClick={() => onViewDetails(event)}
+              className={cn(
+                "flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
+                (isFutureEvent(event.status) && !event.archived) ? "flex-1" : "w-full"
+              )}
             >
-              <Edit className="w-3 h-3" />
-              Edit
+              View Details
+            </button>
+          </div>
+          
+          {/* Archive/Unarchive Button */}
+          {showArchiveButton && (
+            <button 
+              onClick={() => onArchive(event.id)}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-600 border border-orange-600 rounded-md hover:bg-orange-50 transition-colors"
+            >
+              <Archive className="w-3 h-3" />
+              Archive
             </button>
           )}
-          <button 
-            onClick={() => onViewDetails(event)}
-            className={cn(
-              "flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
-              isFutureEvent(event.status) ? "flex-1" : "w-full"
-            )}
-          >
-            View Details
-          </button>
+          
+          {showUnarchiveButton && (
+            <button 
+              onClick={() => onUnarchive(event.id)}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-50 transition-colors"
+            >
+              <ArchiveRestore className="w-3 h-3" />
+              Unarchive
+            </button>
+          )}
         </div>
       </div>
     </div>
