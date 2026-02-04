@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, ArrowUpDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Event, EventFormData } from '@/types/event';
 import { sampleEvents } from '@/data/events';
 import { EventCard } from '@/components/events/EventCard';
@@ -11,18 +11,40 @@ import { EventUsersModal } from '@/components/events/EventUsersModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 type WizardStep = 'type' | 'details' | 'sessions' | 'users' | null;
 type TabType = 'live' | 'upcoming' | 'past' | 'archived';
 type SortOption = 'startDate' | 'name';
+type TypeFilter = 'All' | 'Simple' | 'Standard' | 'Advance';
 
 const Index = () => {
-  const [events, setEvents] = useState<Event[]>(sampleEvents.map(e => ({ ...e, archived: false })));
+  const [events, setEvents] = useState<Event[]>(() => {
+    const saved = localStorage.getItem('events');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved events', e);
+      }
+    }
+    return sampleEvents.map(e => ({ ...e, archived: false }));
+  });
+
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('live');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('startDate');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('All');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
   
   // Wizard state
   const [wizardStep, setWizardStep] = useState<WizardStep>(null);
@@ -30,6 +52,11 @@ const Index = () => {
   const [formData, setFormData] = useState<EventFormData | null>(null);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [formEvent, setFormEvent] = useState<{ name: string; type: 'Simple' | 'Standard' | 'Advance' } | null>(null);
+
+  // Save events to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('events', JSON.stringify(events));
+  }, [events]);
 
   // Update event statuses based on current time
   useEffect(() => {
@@ -109,6 +136,22 @@ const Index = () => {
           return true;
       }
     });
+
+    // Filter by type
+    if (typeFilter !== 'All') {
+      filtered = filtered.filter(event => event.type === typeFilter);
+    }
+
+    // Filter by date range (not for live tab)
+    if (activeTab !== 'live' && dateRange.from) {
+      filtered = filtered.filter(event => {
+        const eventStart = new Date(event.startDate);
+        if (dateRange.to) {
+          return eventStart >= dateRange.from! && eventStart <= dateRange.to!;
+        }
+        return eventStart >= dateRange.from!;
+      });
+    }
     
     // Filter by search query
     if (searchQuery.trim()) {
@@ -127,7 +170,7 @@ const Index = () => {
     });
     
     return filtered;
-  }, [events, activeTab, searchQuery, sortBy]);
+  }, [events, activeTab, searchQuery, sortBy, typeFilter, dateRange]);
 
   // Get draft events for upcoming tab
   const draftEvents = useMemo(() => {
@@ -136,6 +179,22 @@ const Index = () => {
     let drafts = events.filter(event => 
       !event.archived && event.status === 'Draft'
     );
+
+    // Filter by type
+    if (typeFilter !== 'All') {
+      drafts = drafts.filter(event => event.type === typeFilter);
+    }
+
+    // Filter by date range
+    if (dateRange.from) {
+      drafts = drafts.filter(event => {
+        const eventStart = new Date(event.startDate);
+        if (dateRange.to) {
+          return eventStart >= dateRange.from! && eventStart <= dateRange.to!;
+        }
+        return eventStart >= dateRange.from!;
+      });
+    }
     
     // Filter by search query
     if (searchQuery.trim()) {
@@ -154,7 +213,7 @@ const Index = () => {
     });
     
     return drafts;
-  }, [events, activeTab, searchQuery, sortBy]);
+  }, [events, activeTab, searchQuery, sortBy, typeFilter, dateRange]);
 
   const handleViewDetails = (event: Event) => {
     setSelectedEvent(event);
@@ -229,7 +288,31 @@ const Index = () => {
   };
 
   const handleComplete = () => {
-    console.log('Event setup complete:', formData);
+    if (formData) {
+      const newEvent: Event = {
+        id: `evt-${Date.now()}`,
+        ...formData,
+        status: 'Draft',
+        archived: false,
+        attendees: 0,
+        crew: 0,
+        organizers: 0,
+        delegates: 0,
+        sessions: 0,
+        speakers: 0,
+        analytics: {
+          registered: 0,
+          checkedIn: 0,
+          mailAnalytics: {
+            sent: 0,
+            opened: 0,
+            clicked: 0,
+            bounced: 0
+          }
+        }
+      };
+      setEvents(prev => [...prev, newEvent]);
+    }
     handleCloseWizard();
   };
 
@@ -252,40 +335,112 @@ const Index = () => {
             <h1 className="text-xl md:text-2xl font-bold text-foreground">Event Dashboard</h1>
             <p className="text-sm text-muted-foreground">Manage and track your events</p>
           </div>
-          <button 
-            onClick={handleAddEvent}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Event</span>
-          </button>
         </div>
         
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full">
-          <TabsList className="w-full justify-start mb-6">
-            <TabsTrigger value="live">Live</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="past">Past</TabsTrigger>
-            <TabsTrigger value="archived">Archived</TabsTrigger>
-          </TabsList>
+        {/* Tabs and Add Event Button Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full md:w-auto">
+            <TabsList className="w-full md:w-auto justify-start">
+              <TabsTrigger value="live">Live</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="past">Past</TabsTrigger>
+              <TabsTrigger value="archived">Archived</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <button 
+            onClick={handleAddEvent}
+            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Event</span>
+          </button>
+        </div>
 
-          {/* Search and Sort Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search events by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search events by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Date Range Filter (Hidden for Live tab) */}
+            {activeTab !== 'live' && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] justify-start text-left font-normal",
+                        !dateRange.from && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateRange.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>Pick a date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange.from}
+                      selected={{ from: dateRange.from, to: dateRange.to }}
+                      onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
+                      numberOfMonths={2}
+                    />
+                    <div className="p-3 border-t border-border flex justify-end">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setDateRange({ from: undefined, to: undefined })}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
+            {/* Type Filter */}
+            <div className="flex items-center gap-2">
+              <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as TypeFilter)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Event Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Types</SelectItem>
+                  <SelectItem value="Simple">Simple</SelectItem>
+                  <SelectItem value="Standard">Standard</SelectItem>
+                  <SelectItem value="Advance">Advance</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Sort Controls */}
             <div className="flex items-center gap-2">
               <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -295,7 +450,10 @@ const Index = () => {
               </Select>
             </div>
           </div>
+        </div>
 
+        {/* Tab Content */}
+        <Tabs value={activeTab} className="w-full">
           {/* Live Tab */}
           <TabsContent value="live">
             {filteredAndSortedEvents.length === 0 ? (
