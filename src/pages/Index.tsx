@@ -24,8 +24,14 @@ type TypeFilter = 'All' | 'Simple' | 'Standard' | 'Advance';
 
 const Index = () => {
   const [events, setEvents] = useState<Event[]>(() => {
-    // Clear old events to ensure new sample data is loaded
-    localStorage.removeItem('events');
+    const saved = localStorage.getItem('events');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved events', e);
+      }
+    }
     return sampleEvents.map(e => ({ ...e, archived: false }));
   });
 
@@ -293,6 +299,19 @@ const Index = () => {
         }
       };
       setEvents(prev => [...prev, newEvent]);
+      
+      // Switch to the appropriate tab
+      if (isDraft) {
+        setActiveTab('draft');
+      } else {
+        const now = new Date();
+        const endDate = new Date(formData.endDate);
+        if (now > endDate) {
+          setActiveTab('past');
+        } else {
+          setActiveTab('schedule');
+        }
+      }
     }
     handleCloseWizard();
   };
