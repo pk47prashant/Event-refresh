@@ -14,7 +14,154 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_sessions: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_time: string
+          event_id: string
+          id: string
+          location: string | null
+          name: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_time: string
+          event_id: string
+          id?: string
+          location?: string | null
+          name: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          event_id?: string
+          id?: string
+          location?: string | null
+          name?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_users: {
+        Row: {
+          created_at: string
+          custom_fields: Json | null
+          email: string
+          event_id: string
+          first_name: string
+          id: string
+          last_name: string
+          updated_at: string
+          user_type: Database["public"]["Enums"]["event_user_type"]
+        }
+        Insert: {
+          created_at?: string
+          custom_fields?: Json | null
+          email: string
+          event_id: string
+          first_name: string
+          id?: string
+          last_name: string
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["event_user_type"]
+        }
+        Update: {
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string
+          event_id?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["event_user_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_users_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string
+          category: string
+          comms_required: boolean
+          country: string
+          created_at: string
+          end_date: string
+          id: string
+          mode: Database["public"]["Enums"]["event_mode"]
+          name: string
+          session_required: boolean
+          start_date: string
+          status: string
+          survey_required: boolean
+          timezone: string
+          type: Database["public"]["Enums"]["event_type"]
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          address: string
+          category?: string
+          comms_required?: boolean
+          country: string
+          created_at?: string
+          end_date: string
+          id?: string
+          mode?: Database["public"]["Enums"]["event_mode"]
+          name: string
+          session_required?: boolean
+          start_date: string
+          status?: string
+          survey_required?: boolean
+          timezone: string
+          type?: Database["public"]["Enums"]["event_type"]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string
+          category?: string
+          comms_required?: boolean
+          country?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["event_mode"]
+          name?: string
+          session_required?: boolean
+          start_date?: string
+          status?: string
+          survey_required?: boolean
+          timezone?: string
+          type?: Database["public"]["Enums"]["event_type"]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +170,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      event_mode: "in-person" | "hybrid"
+      event_type: "Simple" | "Standard" | "Advance"
+      event_user_type: "attendee" | "delegate" | "crew" | "organizer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +299,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      event_mode: ["in-person", "hybrid"],
+      event_type: ["Simple", "Standard", "Advance"],
+      event_user_type: ["attendee", "delegate", "crew", "organizer"],
+    },
   },
 } as const

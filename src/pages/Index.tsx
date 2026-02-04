@@ -7,8 +7,9 @@ import { EventDetailPanel } from '@/components/events/EventDetailPanel';
 import { EventTypeSelector } from '@/components/events/EventTypeSelector';
 import { EventFormModal } from '@/components/events/EventFormModal';
 import { SessionsModal } from '@/components/events/SessionsModal';
+import { EventUsersModal } from '@/components/events/EventUsersModal';
 
-type WizardStep = 'type' | 'details' | 'sessions' | null;
+type WizardStep = 'type' | 'details' | 'sessions' | 'users' | null;
 
 const Index = () => {
   const [events] = useState<Event[]>(sampleEvents);
@@ -20,7 +21,7 @@ const Index = () => {
   const [selectedType, setSelectedType] = useState<'Simple' | 'Standard' | 'Advance'>('Standard');
   const [formData, setFormData] = useState<EventFormData | null>(null);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
-  const [formEvent, setFormEvent] = useState<Event | null>(null);
+  const [formEvent, setFormEvent] = useState<{ name: string; type: 'Simple' | 'Standard' | 'Advance' } | null>(null);
 
   const handleViewDetails = (event: Event) => {
     setSelectedEvent(event);
@@ -32,7 +33,7 @@ const Index = () => {
     setTimeout(() => setSelectedEvent(null), 300);
   };
 
-  // Add Event Flow: Type → Details → Sessions
+  // Add Event Flow: Type → Details → Sessions (if required) → Users
   const handleAddEvent = () => {
     setFormEvent(null);
     setFormMode('add');
@@ -46,32 +47,39 @@ const Index = () => {
 
   const handleDetailsNext = (data: EventFormData) => {
     setFormData(data);
-    setWizardStep('sessions');
+    // If session required, go to sessions; otherwise go directly to users
+    if (data.sessionRequired) {
+      setWizardStep('sessions');
+    } else {
+      setWizardStep('users');
+    }
   };
 
-  const handleDetailsSave = (data: EventFormData) => {
-    console.log('Saving event:', data);
-    handleCloseWizard();
-  };
-
-  // Edit Event Flow: Details → Sessions
+  // Edit Event Flow: Details → Sessions (if required) → Users
   const handleEditEvent = (event: Event) => {
-    setFormEvent(event);
+    setFormEvent({ name: event.name, type: event.type });
     setSelectedType(event.type);
     setFormMode('edit');
     setWizardStep('details');
-  };
-
-  const handleEditNext = (data: EventFormData) => {
-    setFormData(data);
-    setWizardStep('sessions');
   };
 
   const handleSessionsBack = () => {
     setWizardStep('details');
   };
 
-  const handleSessionsComplete = () => {
+  const handleSessionsNext = () => {
+    setWizardStep('users');
+  };
+
+  const handleUsersBack = () => {
+    if (formData?.sessionRequired) {
+      setWizardStep('sessions');
+    } else {
+      setWizardStep('details');
+    }
+  };
+
+  const handleComplete = () => {
     console.log('Event setup complete:', formData);
     handleCloseWizard();
   };
@@ -137,17 +145,26 @@ const Index = () => {
         mode={formMode}
         isOpen={wizardStep === 'details'}
         selectedType={selectedType}
-        onSave={formMode === 'add' ? handleDetailsSave : handleDetailsSave}
-        onNext={formMode === 'add' ? handleDetailsNext : handleEditNext}
+        onSave={handleDetailsNext}
+        onNext={handleDetailsNext}
         onClose={handleCloseWizard}
       />
 
-      {/* Step 3: Sessions */}
+      {/* Step 3: Sessions (only if sessionRequired) */}
       <SessionsModal
         isOpen={wizardStep === 'sessions'}
         eventData={formData}
         onBack={handleSessionsBack}
-        onComplete={handleSessionsComplete}
+        onComplete={handleSessionsNext}
+        onClose={handleCloseWizard}
+      />
+
+      {/* Step 4: Event Users */}
+      <EventUsersModal
+        isOpen={wizardStep === 'users'}
+        eventData={formData}
+        onBack={handleUsersBack}
+        onComplete={handleComplete}
         onClose={handleCloseWizard}
       />
     </div>

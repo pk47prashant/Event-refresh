@@ -13,7 +13,12 @@ const eventTypes = [
     icon: Zap,
     description: 'Basic event setup',
     tagline: 'Quick & Easy',
-    features: ['Basic registration', 'Single session', 'Email notifications'],
+    features: [
+      'Event User upload, Select or Add',
+      'Guest Check-in with fixed details provide in upload',
+      'Comms (post event)',
+      'Survey (post event)',
+    ],
   },
   {
     type: 'Standard' as const,
@@ -21,7 +26,14 @@ const eventTypes = [
     icon: Star,
     description: 'Most popular choice',
     tagline: 'Most Popular',
-    features: ['Multiple sessions', 'Speaker management', 'Analytics dashboard', 'Custom branding'],
+    features: [
+      'Event User upload, Select or Add',
+      'Simple Web form to collect user information with RSVP yes/no',
+      'Approve or Reject for uninvited user',
+      'Guest Check-in with fixed details provide in upload',
+      'Comms (pre & post event)',
+      'Survey (post event)',
+    ],
   },
   {
     type: 'Advance' as const,
@@ -29,7 +41,14 @@ const eventTypes = [
     icon: Rocket,
     description: 'Full-featured events',
     tagline: 'Enterprise Ready',
-    features: ['Unlimited sessions', 'Advanced analytics', 'API access', 'Priority support', 'Custom integrations'],
+    features: [
+      'All Standard features',
+      'Unlimited sessions',
+      'Advanced analytics',
+      'API access',
+      'Priority support',
+      'Custom integrations',
+    ],
   },
 ];
 
@@ -98,8 +117,8 @@ export function EventTypeSelector({ isOpen, onSelect, onClose }: EventTypeSelect
                   {/* Features */}
                   <ul className="space-y-2 mb-5 flex-1">
                     {eventType.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-status-live flex-shrink-0" />
+                      <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-status-live flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
