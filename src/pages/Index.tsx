@@ -327,18 +327,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full flex flex-col h-full p-4 md:p-6">
+        {/* Header - Fixed */}
+        <div className="flex-none flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">Event Dashboard</h1>
             <p className="text-sm text-muted-foreground">Manage and track your events</p>
           </div>
         </div>
         
-        {/* Tabs and Add Event Button Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        {/* Tabs and Add Event Button Row - Fixed */}
+        <div className="flex-none flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full md:w-auto">
             <TabsList className="w-full md:w-auto justify-start">
               <TabsTrigger value="schedule">Schedule</TabsTrigger>
@@ -357,8 +357,8 @@ const Index = () => {
           </button>
         </div>
 
-        {/* Search and Filter Controls */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        {/* Search and Filter Controls - Fixed */}
+        <div className="flex-none flex flex-col lg:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -452,10 +452,10 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Tab Content */}
-        <Tabs value={activeTab} className="w-full">
+        {/* Tab Content - Scrollable */}
+        <Tabs value={activeTab} className="flex-1 min-h-0">
           {/* Schedule Tab */}
-          <TabsContent value="schedule">
+          <TabsContent value="schedule" className="h-full overflow-y-auto pr-2 pb-8">
             {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No scheduled or live events at the moment</p>
@@ -476,7 +476,7 @@ const Index = () => {
           </TabsContent>
 
           {/* Draft Tab */}
-          <TabsContent value="draft">
+          <TabsContent value="draft" className="h-full overflow-y-auto pr-2 pb-8">
             {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No draft events</p>
@@ -504,7 +504,7 @@ const Index = () => {
           </TabsContent>
 
           {/* Past Tab */}
-          <TabsContent value="past">
+          <TabsContent value="past" className="h-full overflow-y-auto pr-2 pb-8">
             {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No past events</p>
@@ -525,7 +525,7 @@ const Index = () => {
           </TabsContent>
 
           {/* Archived Tab */}
-          <TabsContent value="archived">
+          <TabsContent value="archived" className="h-full overflow-y-auto pr-2 pb-8">
             {filteredAndSortedEvents.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No archived events</p>
