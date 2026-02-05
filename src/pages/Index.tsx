@@ -52,6 +52,8 @@ const Index = () => {
   const [formData, setFormData] = useState<EventFormData | null>(null);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [formEvent, setFormEvent] = useState<{ name: string; type: 'Simple' | 'Standard' | 'Advance' } | null>(null);
+  const [isEventUsersModalOpen, setIsEventUsersModalOpen] = useState(false);
+  const [eventForUsers, setEventForUsers] = useState<Event | null>(null);
 
   // Save events to localStorage whenever they change
   useEffect(() => {
@@ -177,6 +179,21 @@ const Index = () => {
   const handleViewDetails = (event: Event) => {
     setSelectedEvent(event);
     setIsPanelOpen(true);
+  };
+
+  const handleOpenEventUsers = (event: Event) => {
+    setEventForUsers(event);
+    setIsEventUsersModalOpen(true);
+  };
+
+  const handleCloseEventUsers = () => {
+    setIsEventUsersModalOpen(false);
+    setTimeout(() => setEventForUsers(null), 300);
+  };
+
+  const handleGuestCheckin = (eventId: string) => {
+    // Open guest check-in page (placeholder route)
+    window.open(`/guest-checkin/${eventId}`, '_blank');
   };
 
   const handleClosePanel = () => {
@@ -480,8 +497,10 @@ const Index = () => {
                   <EventCard
                     key={event.id}
                     event={event}
-                    onViewDetails={handleViewDetails}
+                    onShowAnalytics={handleViewDetails}
+                    onViewUsers={handleOpenEventUsers}
                     onEdit={handleEditEvent}
+                    onGuestCheckin={handleGuestCheckin}
                     onArchive={handleArchive}
                   />
                 ))}
@@ -508,8 +527,10 @@ const Index = () => {
                   <EventCard
                     key={event.id}
                     event={event}
-                    onViewDetails={handleViewDetails}
+                    onShowAnalytics={handleViewDetails}
+                    onViewUsers={handleOpenEventUsers}
                     onEdit={handleEditEvent}
+                    onGuestCheckin={handleGuestCheckin}
                     onArchive={handleArchive}
                   />
                 ))}
@@ -529,8 +550,10 @@ const Index = () => {
                   <EventCard
                     key={event.id}
                     event={event}
-                    onViewDetails={handleViewDetails}
+                    onShowAnalytics={handleViewDetails}
+                    onViewUsers={handleOpenEventUsers}
                     onEdit={handleEditEvent}
+                    onGuestCheckin={handleGuestCheckin}
                     onArchive={handleArchive}
                   />
                 ))}
@@ -550,8 +573,10 @@ const Index = () => {
                   <EventCard
                     key={event.id}
                     event={event}
-                    onViewDetails={handleViewDetails}
+                    onShowAnalytics={handleViewDetails}
+                    onViewUsers={handleOpenEventUsers}
                     onEdit={handleEditEvent}
+                    onGuestCheckin={handleGuestCheckin}
                     onUnarchive={handleUnarchive}
                   />
                 ))}
@@ -604,6 +629,28 @@ const Index = () => {
         onBack={handleUsersBack}
         onComplete={handleComplete}
         onClose={handleCloseWizard}
+      />
+      {/* Per-event Event Users modal (opened from EventCard -> View Users) */}
+      <EventUsersModal
+        isOpen={isEventUsersModalOpen}
+        eventData={eventForUsers ? {
+          name: eventForUsers.name,
+          category: eventForUsers.category,
+          websiteUrl: eventForUsers.websiteUrl,
+          mode: eventForUsers.mode,
+          country: eventForUsers.country,
+          address: eventForUsers.address,
+          timezone: eventForUsers.timezone,
+          startDate: eventForUsers.startDate,
+          endDate: eventForUsers.endDate,
+          type: eventForUsers.type,
+          sessionRequired: eventForUsers.sessionRequired,
+          commsRequired: eventForUsers.commsRequired,
+          surveyRequired: eventForUsers.surveyRequired,
+        } : null}
+        onBack={handleCloseEventUsers}
+        onComplete={() => handleCloseEventUsers()}
+        onClose={handleCloseEventUsers}
       />
     </div>
   );

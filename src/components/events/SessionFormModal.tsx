@@ -310,18 +310,23 @@ export function SessionFormModal({ isOpen, eventData, onSave, onClose, onBack }:
 
                     {/* If private, show attendee selector */}
                     {formData.isPrivate && (
-                      <button
-                        type="button"
-                        onClick={() => setIsSelectAttendeeOpen(true)}
-                        className="w-full px-3 py-2 text-sm border rounded-lg bg-card text-card-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors text-left flex items-center justify-between border-border"
-                      >
-                        <span className={formData.attendees && formData.attendees.length > 0 ? 'text-card-foreground' : 'text-muted-foreground'}>
-                          {formData.attendees && formData.attendees.length > 0
-                            ? `${formData.attendees.length} attendee${formData.attendees.length !== 1 ? 's' : ''} selected`
-                            : 'Select attendees...'}
-                        </span>
-                        <User className="w-4 h-4" />
-                      </button>
+                      <>
+                        <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-1.5">
+                          Private Session Attendees
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setIsSelectAttendeeOpen(true)}
+                          className="w-full px-3 py-2 text-sm border rounded-lg bg-card text-card-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors text-left flex items-center justify-between border-border"
+                        >
+                          <span className={formData.attendees && formData.attendees.length > 0 ? 'text-card-foreground' : 'text-muted-foreground'}>
+                            {formData.attendees && formData.attendees.length > 0
+                              ? `${formData.attendees.length} attendee${formData.attendees.length !== 1 ? 's' : ''} selected`
+                              : 'Select attendees...'}
+                          </span>
+                          <User className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                   {errors.speakers && <p className="text-xs text-destructive mt-1">{errors.speakers}</p>}
@@ -462,13 +467,6 @@ export function SessionFormModal({ isOpen, eventData, onSave, onClose, onBack }:
               className="px-4 py-2 text-sm font-medium border border-border text-muted-foreground rounded-lg hover:bg-muted transition-colors"
             >
               Back
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium border border-border text-muted-foreground rounded-lg hover:bg-muted transition-colors"
-            >
-              Cancel
             </button>
             <button
               type="button"

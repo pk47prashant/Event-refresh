@@ -258,8 +258,8 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
       />
       
       <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-8">
-        <div className="bg-card rounded-xl shadow-panel w-full max-w-2xl animate-scale-in">
-          <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-5 py-4 rounded-t-xl">
+        <div className="bg-card rounded-xl shadow-panel w-full max-w-2xl animate-scale-in max-h-[90vh] flex flex-col">
+          <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-5 py-4 rounded-t-xl flex-shrink-0">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold">
                 {mode === 'edit' ? 'Edit Event' : 'Add New Event'}
@@ -273,7 +273,7 @@ export function EventFormModal({ event, mode, isOpen, selectedType, onSave, onNe
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-5 flex-1 overflow-y-auto">
             {/* Event Details Section */}
             <div className="border border-primary/20 rounded-lg p-4 mb-4">
               <h3 className="text-sm font-bold text-card-foreground mb-4 flex items-center gap-2">

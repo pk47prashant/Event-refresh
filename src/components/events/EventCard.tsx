@@ -4,8 +4,10 @@ import { cn } from '@/lib/utils';
 
 interface EventCardProps {
   event: Event;
-  onViewDetails: (event: Event) => void;
+  onShowAnalytics: (event: Event) => void;
+  onViewUsers: (event: Event) => void;
   onEdit: (event: Event) => void;
+  onGuestCheckin?: (eventId: string) => void;
   onArchive?: (eventId: string) => void;
   onUnarchive?: (eventId: string) => void;
 }
@@ -60,7 +62,7 @@ const getProgressGradient = (status: string) => {
 
 const isFutureEvent = (status: string) => !['Completed', 'Live'].includes(status);
 
-export function EventCard({ event, onViewDetails, onEdit, onArchive, onUnarchive }: EventCardProps) {
+export function EventCard({ event, onShowAnalytics, onViewUsers, onEdit, onGuestCheckin, onArchive, onUnarchive }: EventCardProps) {
   const stats = [
     { icon: Users, value: event.attendees, color: "text-stat-attendees", bg: "bg-primary/10" },
     { icon: UserCheck, value: event.crew, color: "text-stat-crew", bg: "bg-purple-500/10" },
@@ -87,13 +89,38 @@ export function EventCard({ event, onViewDetails, onEdit, onArchive, onUnarchive
             {event.status === "Live" && <Circle className="w-1.5 h-1.5 fill-current" />}
             <span>{event.status}</span>
           </div>
-          <div className={cn("px-2 py-0.5 rounded text-xs font-medium border", getTypeClasses(event.type))}>
-            {event.type}
-          </div>
+          <div className="flex items-center gap-2">
+              <div className={cn("px-2 py-0.5 rounded text-xs font-medium border", getTypeClasses(event.type))}>
+                {event.type}
+              </div>
+              <div className="text-muted-foreground/80 flex items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (event.archived) {
+                      onUnarchive?.(event.id);
+                    } else {
+                      onArchive?.(event.id);
+                    }
+                  }}
+                  title={event.archived ? 'Unarchive' : 'Archive'}
+                  className="p-1 rounded"
+                >
+                  {event.archived ? (
+                    <ArchiveRestore className="w-3.5 h-3.5 text-[#FFC107]" />
+                  ) : (
+                    <Archive className="w-3.5 h-3.5 text-[#FFC107]" />
+                  )}
+                </button>
+              </div>
+            </div>
         </div>
 
-        {/* Event Name */}
-        <h3 className="text-sm font-semibold text-card-foreground mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+        {/* Event Name (click -> analytics) */}
+        <h3
+          onClick={() => onShowAnalytics(event)}
+          className="cursor-pointer text-sm font-semibold text-card-foreground mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors"
+        >
           {event.name}
         </h3>
 
@@ -140,36 +167,24 @@ export function EventCard({ event, onViewDetails, onEdit, onArchive, onUnarchive
               </button>
             )}
             <button 
-              onClick={() => onViewDetails(event)}
+              onClick={() => onViewUsers(event)}
               className={cn(
                 "flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
                 (isFutureEvent(event.status) && !event.archived) ? "flex-1" : "w-full"
               )}
             >
-              View Details
+              View Users
             </button>
           </div>
           
           {/* Archive/Unarchive Button */}
-          {showArchiveButton && (
-            <button 
-              onClick={() => onArchive(event.id)}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-600 border border-orange-600 rounded-md hover:bg-orange-50 transition-colors"
-            >
-              <Archive className="w-3 h-3" />
-              Archive
-            </button>
-          )}
-          
-          {showUnarchiveButton && (
-            <button 
-              onClick={() => onUnarchive(event.id)}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-50 transition-colors"
-            >
-              <ArchiveRestore className="w-3 h-3" />
-              Unarchive
-            </button>
-          )}
+          {/* Guest Check-in button (replaces archive actions) */}
+          <button
+            onClick={() => onGuestCheckin?.(event.id)}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#5C8CFF] text-white rounded-md hover:bg-[#4a75d9] transition-colors"
+          >
+            Guest Check-in
+          </button>
         </div>
       </div>
     </div>

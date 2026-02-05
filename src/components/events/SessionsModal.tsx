@@ -100,9 +100,9 @@ export function SessionsModal({ isOpen, eventData, onBack, onComplete, onClose }
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-        <div className="bg-card rounded-xl shadow-panel w-full max-w-5xl animate-scale-in max-h-[90vh] flex flex-col">
+        {/* Modal */}
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-8">
+          <div className="bg-card rounded-xl shadow-panel w-full max-w-2xl animate-scale-in max-h-[90vh] flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 rounded-t-xl flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -117,7 +117,7 @@ export function SessionsModal({ isOpen, eventData, onBack, onComplete, onClose }
           </div>
 
           {/* Content */}
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div className="p-5 flex-1 overflow-y-auto">
             {/* Event Date Info & Add Session */}
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">

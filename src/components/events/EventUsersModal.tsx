@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Plus, Search, Users, UserCheck, Briefcase, Building } from 'lucide-react';
+import { X, Upload, Plus, Search, Users, UserCheck, Briefcase, Building, Minimize2, Maximize2 } from 'lucide-react';
 import { EventFormData, EventUser } from '@/types/event';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -31,6 +31,7 @@ export function EventUsersModal({ isOpen, eventData, onBack, onComplete, onClose
   });
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Mock existing users in system for selection
   const [existingUsers] = useState<EventUser[]>([
@@ -95,151 +96,172 @@ export function EventUsersModal({ isOpen, eventData, onBack, onComplete, onClose
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-foreground/40 z-50 animate-fade-in"
-        onClick={onClose}
-      />
+      {!isMinimized && (
+        <div 
+          className="fixed inset-0 bg-foreground/40 z-50 animate-fade-in"
+          onClick={onClose}
+        />
+      )}
       
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-        <div className="bg-card rounded-xl shadow-panel w-full max-w-5xl animate-scale-in max-h-[90vh] flex flex-col">
+      <div className={`fixed z-50 flex ${isMinimized ? 'bottom-4 right-4 w-96 h-16' : 'inset-0 items-center justify-center overflow-y-auto p-4'}`}>
+          <div className={`bg-card rounded-xl shadow-panel ${isMinimized ? 'w-full h-full rounded-xl' : 'w-full h-screen flex-1'} animate-scale-in flex flex-col`}>
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 rounded-t-xl flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Event Users</h2>
-                <p className="text-primary-foreground/80 text-sm mt-1">
-                  Manage attendees, delegates, crew, and organizers
-                </p>
+                {!isMinimized && (
+                  <p className="text-primary-foreground/80 text-sm mt-1">
+                    Manage attendees, delegates, crew, and organizers
+                  </p>
+                )}
               </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-6 flex-1 overflow-y-auto">
-            {/* Global Upload Button */}
-            <div className="flex justify-end mb-4">
-              <button 
-                onClick={handleFileUpload}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Users
-              </button>
-            </div>
-
-            {/* User Type Tabs */}
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-              {(Object.keys(userTypeConfig) as UserType[]).map((type) => {
-                const config = userTypeConfig[type];
-                const Icon = config.icon;
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setActiveTab(type)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                      activeTab === type
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {config.pluralLabel}
-                    <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-background/20">
-                      {users[type].length}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* User Table Section */}
-            <div className="border border-border rounded-lg">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h3 className="font-medium text-card-foreground">
-                  {userTypeConfig[activeTab].pluralLabel}
-                </h3>
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setIsAddUserModalOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+                  onClick={() => setIsMinimized(prev => !prev)}
+                  className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors"
+                  title={isMinimized ? 'Maximize' : 'Minimize'}
                 >
-                  <Plus className="w-4 h-4" />
-                  Select or Add User
+                  {isMinimized ? (
+                    <Maximize2 className="w-5 h-5" />
+                  ) : (
+                    <Minimize2 className="w-5 h-5" />
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+          </div>
 
-              {users[activeTab].length === 0 ? (
-                <div className="p-8 text-center">
-                  <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground text-sm">
-                    No {userTypeConfig[activeTab].pluralLabel.toLowerCase()} added yet
-                  </p>
-                  <p className="text-muted-foreground text-xs mt-1">
-                    Click "Select or Add User" to add {userTypeConfig[activeTab].pluralLabel.toLowerCase()}
-                  </p>
+          {!isMinimized && (
+            <>
+              <div className="p-6 flex-1 overflow-y-auto">
+                {/* Global Upload Button */}
+                <div className="flex justify-end mb-4">
+                  <button 
+                    onClick={handleFileUpload}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Users
+                  </button>
                 </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>First Name</TableHead>
-                      <TableHead>Last Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users[activeTab].map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.firstName}</TableCell>
-                        <TableCell>{user.lastName}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <button
-                            onClick={() => handleRemoveUser(user.id)}
-                            className="text-destructive text-sm hover:underline"
-                          >
-                            Remove
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          </div>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between gap-3 p-5 border-t border-border flex-shrink-0">
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-4 py-2 text-sm font-medium border border-border text-muted-foreground rounded-lg hover:bg-muted transition-colors"
-            >
-              Back
-            </button>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => onComplete(true)}
-                className="px-6 py-2 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
-              >
-                Draft
-              </button>
-              <button
-                type="button"
-                onClick={() => onComplete(false)}
-                className="px-6 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Save & Publish
-              </button>
-            </div>
-          </div>
+                {/* User Type Tabs */}
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                  {(Object.keys(userTypeConfig) as UserType[]).map((type) => {
+                    const config = userTypeConfig[type];
+                    const Icon = config.icon;
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => setActiveTab(type)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                          activeTab === type
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {config.pluralLabel}
+                        <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-background/20">
+                          {users[type].length}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* User Table Section */}
+                <div className="border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h3 className="font-medium text-card-foreground">
+                      {userTypeConfig[activeTab].pluralLabel}
+                    </h3>
+                    <button
+                      onClick={() => setIsAddUserModalOpen(true)}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Select or Add User
+                    </button>
+                  </div>
+
+                  {users[activeTab].length === 0 ? (
+                    <div className="p-8 text-center">
+                      <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                      <p className="text-muted-foreground text-sm">
+                        No {userTypeConfig[activeTab].pluralLabel.toLowerCase()} added yet
+                      </p>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Click "Select or Add User" to add {userTypeConfig[activeTab].pluralLabel.toLowerCase()}
+                      </p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>First Name</TableHead>
+                          <TableHead>Last Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead className="w-[100px]">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users[activeTab].map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>{user.firstName}</TableCell>
+                            <TableCell>{user.lastName}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              <button
+                                onClick={() => handleRemoveUser(user.id)}
+                                className="text-destructive text-sm hover:underline"
+                              >
+                                Remove
+                              </button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between gap-3 p-5 border-t border-border flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="px-4 py-2 text-sm font-medium border border-border text-muted-foreground rounded-lg hover:bg-muted transition-colors"
+                >
+                  Back
+                </button>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => onComplete(true)}
+                    className="px-6 py-2 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+                  >
+                    Draft
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onComplete(false)}
+                    className="px-6 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Save & Publish
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
