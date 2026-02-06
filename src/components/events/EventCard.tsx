@@ -1,4 +1,5 @@
-import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit, Archive, ArchiveRestore } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit, Archive, ArchiveRestore, Mail } from 'lucide-react';
 import { Event } from '@/types/event';
 import { cn } from '@/lib/utils';
 
@@ -63,6 +64,7 @@ const getProgressGradient = (status: string) => {
 const isFutureEvent = (status: string) => !['Completed', 'Live'].includes(status);
 
 export function EventCard({ event, onShowAnalytics, onViewUsers, onEdit, onGuestCheckin, onArchive, onUnarchive }: EventCardProps) {
+  const navigate = useNavigate();
   const stats = [
     { icon: Users, value: event.attendees, color: "text-stat-attendees", bg: "bg-primary/10" },
     { icon: UserCheck, value: event.crew, color: "text-stat-crew", bg: "bg-purple-500/10" },
@@ -177,8 +179,16 @@ export function EventCard({ event, onShowAnalytics, onViewUsers, onEdit, onGuest
             </button>
           </div>
           
-          {/* Archive/Unarchive Button */}
-          {/* Guest Check-in button (replaces archive actions) */}
+          {/* Communication button */}
+          <button
+            onClick={() => navigate(`/events/${event.id}/communication`)}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-primary text-primary rounded-md hover:bg-primary/5 transition-colors"
+          >
+            <Mail className="w-3 h-3" />
+            Communication
+          </button>
+          
+          {/* Guest Check-in button */}
           <button
             onClick={() => onGuestCheckin?.(event.id)}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#5C8CFF] text-white rounded-md hover:bg-[#4a75d9] transition-colors"

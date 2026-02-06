@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, BarChart3, TrendingUp, UserPlus, CheckCircle, Mail, MailOpen, MousePointerClick, AlertCircle, Users, Mic, MessageSquare, Briefcase, Maximize2, Minimize2, Crown, UserCheck } from 'lucide-react';
 import { Event } from '@/types/event';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,7 @@ interface EventDetailPanelProps {
 }
 export function EventDetailPanel({ event, isOpen, onClose }: EventDetailPanelProps) {
   const [isFullView, setIsFullView] = useState(false);
+  const navigate = useNavigate();
 
   if (!event) return null;
 
@@ -67,6 +69,16 @@ export function EventDetailPanel({ event, isOpen, onClose }: EventDetailPanelPro
               <p className={cn("text-sm opacity-90", isFullView ? "" : "line-clamp-2")}>{event.name}</p>
             </div>
             <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  handleClose();
+                  navigate(`/events/${event.id}/communication`);
+                }}
+                className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors"
+                title="Communication"
+              >
+                <Mail className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => setIsFullView(!isFullView)}
                 className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors"

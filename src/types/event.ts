@@ -58,7 +58,7 @@ export interface EventUser {
   firstName: string;
   lastName: string;
   email: string;
-  userType: 'attendee' | 'delegate' | 'crew' | 'organizer';
+  userType: 'attendee' | 'delegate' | 'crew' | 'organizer' | 'manager' | 'speaker';
   customFields: Record<string, string>;
 }
 
