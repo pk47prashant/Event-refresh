@@ -43,7 +43,7 @@ const eventTypes = [
       'Website with multiple pages',
       'Attendees registration process',
       'Approve or Reject registered users',
-      'Accept or Decline pre-approved users' 
+      'Accept or Decline pre-approved users',
       'Guest Check-in with config fields',
       'Comms - Pre-Post Event (optional)',
       'Survey - Pre-Post Event (optional)',
@@ -98,19 +98,6 @@ export function EventTypeSelector({ isOpen, onSelect, onClose }: EventTypeSelect
                     </div>
                     <h3 className="text-lg font-bold text-card-foreground">{eventType.title}</h3>
                     <p className="text-xs text-muted-foreground mt-1">{eventType.description}</p>
-                  </div>
-
-                  {/* Tagline */}
-                  <div className="text-center mb-4">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                      eventType.type === 'Standard' 
-                        ? 'bg-status-live/10 text-status-live' 
-                        : eventType.type === 'Advance'
-                        ? 'bg-status-urgent/10 text-status-urgent'
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {eventType.tagline}
-                    </span>
                   </div>
 
                   {/* Features */}

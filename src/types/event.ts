@@ -33,6 +33,7 @@ export interface Event {
   sessions: number;
   speakers: number;
   analytics: EventAnalytics;
+  archived?: boolean;
 }
 
 export interface EventFormData {

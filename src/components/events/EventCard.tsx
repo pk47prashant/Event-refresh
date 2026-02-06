@@ -1,11 +1,15 @@
-import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit } from 'lucide-react';
+import { Calendar, MapPin, Users, UserCheck, Crown, Briefcase, MessageSquare, Mic, Circle, Edit, Archive, ArchiveRestore } from 'lucide-react';
 import { Event } from '@/types/event';
 import { cn } from '@/lib/utils';
 
 interface EventCardProps {
   event: Event;
-  onViewDetails: (event: Event) => void;
+  onShowAnalytics: (event: Event) => void;
+  onViewUsers: (event: Event) => void;
   onEdit: (event: Event) => void;
+  onGuestCheckin?: (eventId: string) => void;
+  onArchive?: (eventId: string) => void;
+  onUnarchive?: (eventId: string) => void;
 }
 
 const formatDate = (startDate: string, endDate: string) => {
@@ -58,12 +62,15 @@ const getProgressGradient = (status: string) => {
 
 const isFutureEvent = (status: string) => !['Completed', 'Live'].includes(status);
 
-export function EventCard({ event, onViewDetails, onEdit }: EventCardProps) {
+export function EventCard({ event, onShowAnalytics, onViewUsers, onEdit, onGuestCheckin, onArchive, onUnarchive }: EventCardProps) {
   const stats = [
     { icon: Users, value: event.attendees, color: "text-stat-attendees", bg: "bg-primary/10" },
     { icon: UserCheck, value: event.crew, color: "text-stat-crew", bg: "bg-purple-500/10" },
     { icon: Crown, value: event.organizers, color: "text-stat-organizers", bg: "bg-amber-500/10" },
   ];
+
+  const showArchiveButton = onArchive && !event.archived && event.status !== "Live";
+  const showUnarchiveButton = onUnarchive && event.archived;
 
   return (
     <div className="group bg-card rounded-lg shadow-card hover:shadow-card-hover transition-all duration-200 overflow-hidden border border-border">
@@ -82,13 +89,38 @@ export function EventCard({ event, onViewDetails, onEdit }: EventCardProps) {
             {event.status === "Live" && <Circle className="w-1.5 h-1.5 fill-current" />}
             <span>{event.status}</span>
           </div>
-          <div className={cn("px-2 py-0.5 rounded text-xs font-medium border", getTypeClasses(event.type))}>
-            {event.type}
-          </div>
+          <div className="flex items-center gap-2">
+              <div className={cn("px-2 py-0.5 rounded text-xs font-medium border", getTypeClasses(event.type))}>
+                {event.type}
+              </div>
+              <div className="text-muted-foreground/80 flex items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (event.archived) {
+                      onUnarchive?.(event.id);
+                    } else {
+                      onArchive?.(event.id);
+                    }
+                  }}
+                  title={event.archived ? 'Unarchive' : 'Archive'}
+                  className="p-1 rounded"
+                >
+                  {event.archived ? (
+                    <ArchiveRestore className="w-3.5 h-3.5 text-[#FFC107]" />
+                  ) : (
+                    <Archive className="w-3.5 h-3.5 text-[#FFC107]" />
+                  )}
+                </button>
+              </div>
+            </div>
         </div>
 
-        {/* Event Name */}
-        <h3 className="text-sm font-semibold text-card-foreground mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+        {/* Event Name (click -> analytics) */}
+        <h3
+          onClick={() => onShowAnalytics(event)}
+          className="cursor-pointer text-sm font-semibold text-card-foreground mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors"
+        >
           {event.name}
         </h3>
 
@@ -123,24 +155,35 @@ export function EventCard({ event, onViewDetails, onEdit }: EventCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-3 border-t border-border">
-          {isFutureEvent(event.status) && (
-            <button 
-              onClick={() => onEdit(event)}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/5 transition-colors"
-            >
-              <Edit className="w-3 h-3" />
-              Edit
-            </button>
-          )}
-          <button 
-            onClick={() => onViewDetails(event)}
-            className={cn(
-              "flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
-              isFutureEvent(event.status) ? "flex-1" : "w-full"
+        <div className="flex flex-col gap-2 pt-3 border-t border-border">
+          <div className="flex gap-2">
+            {isFutureEvent(event.status) && !event.archived && (
+              <button 
+                onClick={() => onEdit(event)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/5 transition-colors"
+              >
+                <Edit className="w-3 h-3" />
+                Edit
+              </button>
             )}
+            <button 
+              onClick={() => onViewUsers(event)}
+              className={cn(
+                "flex items-center justify-center px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors",
+                (isFutureEvent(event.status) && !event.archived) ? "flex-1" : "w-full"
+              )}
+            >
+              View Users
+            </button>
+          </div>
+          
+          {/* Archive/Unarchive Button */}
+          {/* Guest Check-in button (replaces archive actions) */}
+          <button
+            onClick={() => onGuestCheckin?.(event.id)}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#5C8CFF] text-white rounded-md hover:bg-[#4a75d9] transition-colors"
           >
-            View Details
+            Guest Check-in
           </button>
         </div>
       </div>
