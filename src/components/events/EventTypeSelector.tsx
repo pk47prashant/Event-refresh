@@ -43,7 +43,7 @@ const eventTypes = [
       'Website with multiple pages',
       'Attendees registration process',
       'Approve or Reject registered users',
-      'Accept or Decline pre-approved users' 
+      'Accept or Decline pre-approved users',
       'Guest Check-in with config fields',
       'Comms - Pre-Post Event (optional)',
       'Survey - Pre-Post Event (optional)',
@@ -100,7 +100,7 @@ export function EventTypeSelector({ isOpen, onSelect, onClose }: EventTypeSelect
                     <p className="text-xs text-muted-foreground mt-1">{eventType.description}</p>
                   </div>
 
-                  {/* Tagline */}
+                  {/* Type Badge */}
                   <div className="text-center mb-4">
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
                       eventType.type === 'Standard' 
@@ -109,7 +109,7 @@ export function EventTypeSelector({ isOpen, onSelect, onClose }: EventTypeSelect
                         ? 'bg-status-urgent/10 text-status-urgent'
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {eventType.tagline}
+                      {eventType.description}
                     </span>
                   </div>
 
